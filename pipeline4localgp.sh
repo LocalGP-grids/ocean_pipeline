@@ -77,13 +77,13 @@ if [[ $selectprofiles == 'true' ]]; then
     echo $prep_id
     exit
 else
-    declare varcreation=$(sbatch --parsable --exclude $node_banlist --dependency=afterok:$slurmawait variable_creation.slurm $selectionfile $varfile $variable $integration_mode $region $level $node_banlist)
+    declare varcreation=$(sbatch --parsable --exclude $node_banlist --dependency=afterok:$slurmawait variable_creation.slurm $selectionfile $varfile $variable $integration_mode $region $level)
 fi
 
 # postprocessing: downsample as needed and turn into the matlab localgp expects
 downsampled=${data_dir}/${file_tag}_downsampled.parquet
 matlab=${data_dir}/${file_tag}.mat
-declare downsample=$(sbatch --parsable --exclude $node_banlist --dependency=afterok:$varcreation downsample.slurm $varfile $downsampled $simple_downsample $node_banlist)
-sbatch --exclude $node_banlist --dependency=afterok:$downsample matlab4localgp.slurm $downsampled $matlab ${variable} $localgp_target $node_banlist
+declare downsample=$(sbatch --parsable --exclude $node_banlist --dependency=afterok:$varcreation downsample.slurm $varfile $downsampled $simple_downsample)
+sbatch --exclude $node_banlist --dependency=afterok:$downsample matlab4localgp.slurm $downsampled $matlab ${variable} $localgp_target
 
 
