@@ -6,8 +6,8 @@
 
 declare runtag=$5                               # unique ID for this run
 declare variable=$6        # 'absolute_salinity', 'potential_temperature', 'conservative_temperature', 'potential_density', 'mld', 'dynamic_height_anom', 'steric_hgt_anom', 'thermosteric_hgt_anom_linar', 'halosteric_hgt_anom_linear', 'thermosteric_hgt_anom', 'halosteric_hgt_anom'. Anything else will make the variable creation step a no op (ie assumes its already present).
-declare level=None                                # dbar to interpolate to if interpolation is desired; None otherwise
-declare region=$7                         # integration dbar region, string CSV, in integration mode
+declare level=$7                                # dbar to interpolate to if interpolation is desired; None otherwise
+declare region=None                         # integration dbar region, string CSV, in integration mode
 declare selectprofiles=$9                  # 'true' to run data selection step (slow), 'false' to use previously run data-selection step with the same runtag. Nominally should only need to run true once for a list of downstream variable computations.
 declare localgp_target=$4			# LocalGP run directory the final matlab files should be placed in, typically /.../.../.../MonthlyInputs/2032_2068/.
 declare data_dir=$1                             # where is the relevant upstream data?
@@ -16,7 +16,7 @@ declare month=$3                                # month this data corresponds to
 ## you probably don't need to touch the following
 declare slurmawait=$8                      # slurm job id to wait for successful completion of, typically when blocking a bunch of levels on a single selectprofiles=true run
 declare simple_downsample='False'          # set to 'True' to just take the first item in a cluster of measurements (typically for me4oh); otherwise perform a depth and resolution heuristic to choose (requires a 'pressure' vector to be present)
-declare integration_mode='trapezoidal'             # integration method; currently only 'trapezoidal', or None if integration not desired
+declare integration_mode=None             # integration method; currently only 'trapezoidal', or None if integration not desired
 declare upstream='argonc'                       # 'argovis', 'wod', 'argonc', 'me4oh' [wip, argonc and me4oh only reliable ones for now]
 declare me4oh_levelidx=2                        # 0,1 or 2 to pick the level from the upstream data in me4oh
 declare pqc='1,2'                                   # qc to keep for pressure, can be single valued (0) or string CSV ('0,1')
@@ -52,11 +52,11 @@ if [[ $upstream == 'me4oh' ]]; then
 else
     qctag="p${pqc//,/}_t${tqc//,/}_s${sqc//,/}"
     selectionfile=${data_dir}/${runtag}_${year}_${month}_${qctag}_selected_profiles.parquet
-    if [[ "$region" -ne None ]]; then
+    if [[ "$region" != None ]]; then
         region_tag=${region/,/_}
         file_tag=${runtag}_${year}_${month}_${qctag}_${variable}_${region_tag}
-    elif [["$level" -ne None]]; then
-        file_tag=${runtag}_${year}_${month}_${qctag}_${variable}_${level}
+    elif [[ "$level" != None ]]; then
+        file_tag=${runtag}_${year}_${month}_${qctag}_${variable}_${level}_${level} # localgp gets weird if there isn't a shallow_deep level token, kludge in
     fi
     varfile=${data_dir}/${file_tag}.parquet
 fi
