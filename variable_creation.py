@@ -6,6 +6,8 @@ def str_list(value):
     return value.split(',')
 
 def float_list(value):
+    if value is None or value.lower() == "none":
+        return None
     return [float(x) for x in value.split(',')]
 
 def nullable_string(value):
