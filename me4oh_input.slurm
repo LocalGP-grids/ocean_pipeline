@@ -16,7 +16,7 @@ module load anaconda/2023.09
 conda activate wod2mat
 
 cd $SLURM_SUBMIT_DIR
-python me4oh_input.py --data_dir $1 --year $2 --month $3 --output_file $4 --var $5 --level_index $6
+python me4oh_input.py --data_dir $1 --year $2 --month $3 --output_file $4
 
 
 
